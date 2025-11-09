@@ -354,6 +354,7 @@
     "routingStrategy": "Routing Strategy",
     "keyManagement": "Key Management",
     "aggregateGroups": "Aggregate Groups",
+    "modelRedirect": "Model Redirect",
     "channels": "Channels",
     "geminiOpenai": "Gemini Official OpenAI Compatible",
     "integrations": "Integrations",
@@ -4496,6 +4497,20 @@
         }
       ]
     },
+    "modelRedirectIntegration": {
+      "title": "Integration with Model Redirect",
+      "description": "When aggregate groups contain sub-groups of the same channel type but connecting to different service providers, configure model redirect in each sub-group to enable unified model name access from clients.",
+      "example": {
+        "title": "Use Case",
+        "scenario": "Aggregate group contains three OpenAI-format sub-groups connecting to different providers, with clients using unified gpt-4 model name:",
+        "configs": [
+          "Sub-group A (OpenAI Official): {\"gpt-4\": \"gpt-4-turbo\"}",
+          "Sub-group B (Azure OpenAI): {\"gpt-4\": \"gpt-35-turbo\"}",
+          "Sub-group C (OpenRouter): {\"gpt-4\": \"openai/gpt-4-turbo\"}"
+        ],
+        "benefit": "Clients only need to use gpt-4, aggregate group distributes traffic based on weights, and each sub-group automatically maps it to the actually supported model."
+      }
+    },
     "troubleshooting": {
       "title": "Troubleshooting",
       "causeLabel": "Cause",
@@ -4531,6 +4546,133 @@
           ]
         }
       ]
+    }
+  },
+  "modelRedirect": {
+    "title": "Model Redirect",
+    "subtitle": "Model redirect allows you to transparently map model names in requests to other models without modifying client code, enabling version management, flexible switching, and access control.",
+    "coreValue": {
+      "title": "Core Value",
+      "items": [
+        {
+          "icon": "🔄",
+          "title": "Version Management",
+          "description": "Centrally manage model versions and switch globally used model versions with one click"
+        },
+        {
+          "icon": "🔀",
+          "title": "Flexible Switching",
+          "description": "Freely switch between different providers or models with similar capabilities, maintaining business continuity"
+        },
+        {
+          "icon": "🏷️",
+          "title": "Simplified Naming",
+          "description": "Create memorable aliases for complex model version numbers"
+        },
+        {
+          "icon": "🔒",
+          "title": "Access Control",
+          "description": "Strictly limit available model scope through whitelist mode"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Configuration Guide",
+      "location": {
+        "title": "Configuration Location",
+        "steps": [
+          "Log in to GPT-Load admin console",
+          "Navigate to \"Group Management\" page",
+          "Click \"Edit\" button for the target group",
+          "Find \"Model Redirect Rules\" configuration area in the form"
+        ]
+      },
+      "format": {
+        "title": "Configuration Format",
+        "important": "Important Note",
+        "keyValue": "In JSON configuration, key is the available model name for users (after redirect), value is the actual model name requested to upstream",
+        "effect": "Configuration Effect",
+        "examples": [
+          "Client requests gpt-4 → Actually calls gpt-4-turbo-2024-04-09",
+          "Client requests gpt-4o → Actually calls gpt-4o-2024-05-13",
+          "Client requests gpt-3.5-turbo → Directly passed through (not configured)"
+        ]
+      }
+    },
+    "policyModes": {
+      "title": "Policy Modes",
+      "loose": {
+        "title": "Loose Mode (Default)",
+        "description": "Configured models are redirected, unconfigured models are passed through to upstream service. Suitable for general proxy scenarios, maintaining maximum compatibility.",
+        "config": "Configuration rule: {\"gpt-4\": \"gpt-4-turbo\"}",
+        "behavior": [
+          "gpt-4 → gpt-4-turbo (redirect)",
+          "gpt-3.5-turbo → gpt-3.5-turbo (pass-through)",
+          "claude-3 → claude-3 (pass-through)"
+        ]
+      },
+      "strict": {
+        "title": "Strict Mode",
+        "description": "Only allows source model names in configuration rules, unconfigured model requests return 400 error. Suitable for whitelist control and strict cost management.",
+        "config": "Configuration rule: {\"allowed-model\": \"gpt-4-turbo\"}",
+        "behavior": [
+          "allowed-model → gpt-4-turbo (redirect)",
+          "gpt-4 → 400 error ❌",
+          "gpt-3.5-turbo → 400 error ❌"
+        ]
+      }
+    },
+    "useCases": {
+      "title": "Typical Use Cases",
+      "scenarios": [
+        {
+          "title": "Scenario 1: Unified Model Version Management",
+          "description": "Multiple internal projects use gpt-4, need to uniformly upgrade to the latest version. No need to modify project code, centrally switch versions at proxy layer.",
+          "config": "{\n  \"gpt-4\": \"gpt-4-turbo-2024-04-09\",\n  \"gpt-4-32k\": \"gpt-4-turbo-2024-04-09\"\n}"
+        },
+        {
+          "title": "Scenario 2: Flexible Provider Switching",
+          "description": "Switch between models with similar capabilities from different providers, or dynamically adjust based on availability, region, etc. Seamless migration while maintaining business continuity.",
+          "config": "{\n  \"gpt-4\": \"claude-3-opus-20240229\",\n  \"default-chat\": \"gemini-2.0-flash\"\n}"
+        },
+        {
+          "title": "Scenario 3: Creating Short Aliases",
+          "description": "Simplify complex model version numbers to improve development experience. Cleaner client code, only need to modify configuration when upgrading versions.",
+          "config": "{\n  \"gpt5\": \"gpt-5-2025-08-07\",\n  \"flash\": \"gemini-2.5-flash-preview\",\n  \"opus\": \"claude-3-opus-20240229\"\n}"
+        },
+        {
+          "title": "Scenario 4: Aggregate Groups Model Unification",
+          "description": "When aggregate groups contain sub-groups of the same channel type but connecting to different service providers, configure model redirect in each sub-group to allow clients to use a unified model name across different providers.",
+          "config": "Sub-group A (OpenAI Official): {\"gpt-4\": \"gpt-4-turbo\"}\nSub-group B (Azure OpenAI): {\"gpt-4\": \"gpt-35-turbo\"}\nSub-group C (OpenRouter): {\"gpt-4\": \"openai/gpt-4-turbo\"}"
+        }
+      ]
+    },
+    "notes": {
+      "title": "Important Notes",
+      "limitations": {
+        "title": "Configuration Limitations",
+        "items": [
+          "Aggregate groups themselves don't support model redirect, but their sub-groups (standard groups) do",
+          "Must be valid JSON format",
+          "Keys and values must be non-empty strings",
+          "Regular expressions or wildcards not supported"
+        ]
+      },
+      "recommendations": {
+        "title": "Usage Recommendations",
+        "items": [
+          "Recommend loose mode for production environments",
+          "Use strict mode in test environments to control costs",
+          "Regularly audit redirect logs",
+          "Clean up expired redirect rules promptly"
+        ]
+      }
+    },
+    "summary": {
+      "title": "Feature Summary",
+      "description": "Model redirect executes transparently in the request chain, imperceptible to clients. Configuration supports hot updates without service restart.",
+      "keyPoint": "Key Point",
+      "keyPointValue": "In JSON configuration, key is user-available model, value is upstream actual model"
     }
   }
 }

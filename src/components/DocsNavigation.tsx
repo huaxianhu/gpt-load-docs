@@ -25,6 +25,7 @@ import {
   BookUser,
   HelpCircle,
   Lock,
+  Repeat,
 } from "lucide-react";
 
 const DocsNavigation = ({ onItemClick }: { onItemClick?: () => void }) => {
@@ -109,6 +110,11 @@ const DocsNavigation = ({ onItemClick }: { onItemClick?: () => void }) => {
           title: t("docs.aggregateGroups"),
           href: "/docs/architecture-design/aggregate-groups",
           icon: Layers,
+        },
+        {
+          title: t("docs.modelRedirect"),
+          href: "/docs/architecture-design/model-redirect",
+          icon: Repeat,
         },
       ],
     },

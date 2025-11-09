@@ -341,6 +341,7 @@
     "routingStrategy": "路径设计策略",
     "keyManagement": "智能密钥管理",
     "aggregateGroups": "聚合分组",
+    "modelRedirect": "模型重定向",
     "channels": "渠道类型",
     "geminiOpenai": "Gemini 官方 OpenAI 兼容",
     "integrations": "接入指南",
@@ -4448,6 +4449,20 @@
         }
       ]
     },
+    "modelRedirectIntegration": {
+      "title": "配合模型重定向",
+      "description": "当聚合分组包含多个相同渠道类型但对接不同服务商的子分组时，可在每个子分组配置模型重定向，实现客户端统一模型名访问。",
+      "example": {
+        "title": "应用示例",
+        "scenario": "聚合分组包含三个 OpenAI 格式的子分组，对接不同服务商，客户端统一使用 gpt-4 模型名：",
+        "configs": [
+          "子分组A (OpenAI官方): {\"gpt-4\": \"gpt-4-turbo\"}",
+          "子分组B (Azure OpenAI): {\"gpt-4\": \"gpt-35-turbo\"}",
+          "子分组C (OpenRouter): {\"gpt-4\": \"openai/gpt-4-turbo\"}"
+        ],
+        "benefit": "客户端只需使用 gpt-4，聚合分组会根据权重分配流量，每个子分组自动将其映射到实际支持的模型。"
+      }
+    },
     "troubleshooting": {
       "title": "故障排查",
       "causeLabel": "原因",
@@ -4483,6 +4498,133 @@
           ]
         }
       ]
+    }
+  },
+  "modelRedirect": {
+    "title": "模型重定向",
+    "subtitle": "模型重定向功能允许您在不修改客户端代码的情况下，透明地将请求中的模型名称映射到其他模型，实现版本管理、灵活切换和访问控制。",
+    "coreValue": {
+      "title": "核心价值",
+      "items": [
+        {
+          "icon": "🔄",
+          "title": "版本管理",
+          "description": "统一管理模型版本，一键切换全局使用的模型版本"
+        },
+        {
+          "icon": "🔀",
+          "title": "灵活切换",
+          "description": "在不同供应商或相同能力的模型间自由切换，保持业务连续性"
+        },
+        {
+          "icon": "🏷️",
+          "title": "简化命名",
+          "description": "为复杂的模型版本号创建易记的别名"
+        },
+        {
+          "icon": "🔒",
+          "title": "访问控制",
+          "description": "通过白名单模式严格限制可用模型范围"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "配置说明",
+      "location": {
+        "title": "配置位置",
+        "steps": [
+          "登录 GPT-Load 管理后台",
+          "进入「分组管理」页面",
+          "点击目标分组的「编辑」按钮",
+          "在表单中找到「模型重定向规则」配置区域"
+        ]
+      },
+      "format": {
+        "title": "配置格式",
+        "important": "重要说明",
+        "keyValue": "JSON 配置中，key 是用户可用的模型名称（重定向后），value 是请求上游的真实模型名称",
+        "effect": "配置效果",
+        "examples": [
+          "客户端请求 gpt-4 → 实际调用 gpt-4-turbo-2024-04-09",
+          "客户端请求 gpt-4o → 实际调用 gpt-4o-2024-05-13",
+          "客户端请求 gpt-3.5-turbo → 直接透传（未配置规则）"
+        ]
+      }
+    },
+    "policyModes": {
+      "title": "策略模式",
+      "loose": {
+        "title": "宽松模式（默认）",
+        "description": "配置的模型进行重定向，未配置的模型直接透传到上游服务。适用于通用代理场景，保持最大兼容性。",
+        "config": "配置规则：{\"gpt-4\": \"gpt-4-turbo\"}",
+        "behavior": [
+          "gpt-4 → gpt-4-turbo（重定向）",
+          "gpt-3.5-turbo → gpt-3.5-turbo（透传）",
+          "claude-3 → claude-3（透传）"
+        ]
+      },
+      "strict": {
+        "title": "严格模式",
+        "description": "仅允许配置规则中的源模型名称，未配置的模型请求返回 400 错误。适用于白名单控制和成本严格管控。",
+        "config": "配置规则：{\"allowed-model\": \"gpt-4-turbo\"}",
+        "behavior": [
+          "allowed-model → gpt-4-turbo（重定向）",
+          "gpt-4 → 400 错误 ❌",
+          "gpt-3.5-turbo → 400 错误 ❌"
+        ]
+      }
+    },
+    "useCases": {
+      "title": "典型应用场景",
+      "scenarios": [
+        {
+          "title": "场景一：模型版本统一管理",
+          "description": "公司内部多个项目使用 gpt-4，需要统一升级到最新版本。无需修改各项目代码，在代理层统一切换版本。",
+          "config": "{\n  \"gpt-4\": \"gpt-4-turbo-2024-04-09\",\n  \"gpt-4-32k\": \"gpt-4-turbo-2024-04-09\"\n}"
+        },
+        {
+          "title": "场景二：供应商灵活切换",
+          "description": "在不同供应商的相同能力模型间切换，或根据可用性、地域等因素动态调整。无缝迁移，保持业务连续性。",
+          "config": "{\n  \"gpt-4\": \"claude-3-opus-20240229\",\n  \"default-chat\": \"gemini-2.0-flash\"\n}"
+        },
+        {
+          "title": "场景三：创建简短别名",
+          "description": "简化复杂的模型版本号，提升开发体验。客户端代码更简洁，版本升级时只需修改配置。",
+          "config": "{\n  \"gpt5\": \"gpt-5-2025-08-07\",\n  \"flash\": \"gemini-2.5-flash-preview\",\n  \"opus\": \"claude-3-opus-20240229\"\n}"
+        },
+        {
+          "title": "场景四：聚合分组模型统一",
+          "description": "聚合分组包含多个相同渠道类型但对接不同服务商的子分组时，通过在每个子分组配置模型重定向，让客户端使用统一的模型名称访问不同服务商。",
+          "config": "子分组A (OpenAI官方): {\"gpt-4\": \"gpt-4-turbo\"}\n子分组B (Azure OpenAI): {\"gpt-4\": \"gpt-35-turbo\"}\n子分组C (OpenRouter): {\"gpt-4\": \"openai/gpt-4-turbo\"}"
+        }
+      ]
+    },
+    "notes": {
+      "title": "注意事项",
+      "limitations": {
+        "title": "配置限制",
+        "items": [
+          "聚合分组本身不支持模型重定向，但其子分组（标准分组）支持",
+          "必须是有效的 JSON 格式",
+          "键和值都必须是非空字符串",
+          "不支持正则表达式或通配符"
+        ]
+      },
+      "recommendations": {
+        "title": "使用建议",
+        "items": [
+          "生产环境建议使用宽松模式",
+          "测试环境可用严格模式控制成本",
+          "定期审计重定向日志",
+          "及时清理过期的重定向规则"
+        ]
+      }
+    },
+    "summary": {
+      "title": "功能总结",
+      "description": "模型重定向在请求链路中透明执行，客户端感知不到映射过程。配置支持热更新，无需重启服务即可生效。",
+      "keyPoint": "关键要点",
+      "keyPointValue": "JSON 配置中，key 是用户可用模型，value 是上游真实模型"
     }
   }
 }

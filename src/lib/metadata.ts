@@ -616,6 +616,26 @@ export const PAGE_SEO_CONFIGS: Record<string, Record<SupportedLanguage, PageSeoC
       keywords: "集約グループ, マルチキープール管理, 負荷分散, 重み設定, スムーズ重み付けラウンドロビン, 高可用性アーキテクチャ, キープール統合, GPT-Load",
       type: 'article'
     }
+  },
+  '/docs/architecture-design/model-redirect': {
+    zh: {
+      title: "模型重定向 - GPT-Load",
+      description: "深入了解GPT-Load模型重定向功能的设计与实现，掌握模型映射配置、策略模式、版本管理和灵活切换等核心特性，实现透明的模型切换和访问控制。",
+      keywords: "模型重定向, 模型映射, 版本管理, 访问控制, 模型别名, 灵活切换, 白名单模式, GPT-Load",
+      type: 'article'
+    },
+    en: {
+      title: "Model Redirect - GPT-Load",
+      description: "In-depth understanding of GPT-Load model redirect feature design and implementation, master model mapping configuration, policy modes, version management and flexible switching to achieve transparent model switching and access control.",
+      keywords: "model redirect, model mapping, version management, access control, model alias, flexible switching, whitelist mode, GPT-Load",
+      type: 'article'
+    },
+    ja: {
+      title: "モデルリダイレクト - GPT-Load",
+      description: "GPT-Loadモデルリダイレクト機能の設計と実装の詳細理解。モデルマッピング設定、ポリシーモード、バージョン管理、柔軟な切り替えなどのコア機能をマスターし、透過的なモデル切り替えとアクセス制御を実現。",
+      keywords: "モデルリダイレクト, モデルマッピング, バージョン管理, アクセス制御, モデルエイリアス, 柔軟な切り替え, ホワイトリストモード, GPT-Load",
+      type: 'article'
+    }
   }
   // 架构预留：后续可继续添加其他页面的SEO配置
 };

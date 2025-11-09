@@ -460,6 +460,44 @@ export default function AggregateGroupsContent() {
         </div>
       </section>
 
+      {/* Model Redirect Integration */}
+      <section className="mb-12">
+        <h2 className="text-3xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+          <GitMerge className="h-7 w-7 text-cyan-600 dark:text-cyan-400 mr-3" />
+          {t("aggregateGroups.modelRedirectIntegration.title")}
+        </h2>
+
+        <div className="bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-200 dark:border-cyan-700 rounded-lg p-6 mb-6">
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            {t("aggregateGroups.modelRedirectIntegration.description")}
+          </p>
+
+          <div className="bg-white dark:bg-gray-800 border border-cyan-200 dark:border-cyan-700 rounded-lg p-5">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+              {t("aggregateGroups.modelRedirectIntegration.example.title")}
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+              {t("aggregateGroups.modelRedirectIntegration.example.scenario")}
+            </p>
+
+            <div className="space-y-2 mb-4">
+              {tArray("aggregateGroups.modelRedirectIntegration.example.configs").map((config: string, index: number) => (
+                <div key={index} className="bg-gray-50 dark:bg-gray-900 rounded px-3 py-2">
+                  <code className="text-sm text-gray-800 dark:text-gray-300">{config}</code>
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg p-4">
+              <p className="text-green-800 dark:text-green-300 text-sm flex items-start">
+                <CheckCircle className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
+                <span>{t("aggregateGroups.modelRedirectIntegration.example.benefit")}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Troubleshooting */}
       <section className="mb-12">
         <h2 className="text-3xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
